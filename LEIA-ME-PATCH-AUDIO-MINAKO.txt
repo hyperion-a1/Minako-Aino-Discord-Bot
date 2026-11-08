@@ -1,0 +1,34 @@
+PATCH INCREMENTAL — ÁUDIO DA ACTIVITY DA MINAKO
+
+O que adiciona:
+- Efeitos sonoros originais gerados proceduralmente via Web Audio API (sem samples de terceiros).
+- Música ambiente relaxante sintetizada em tempo real; não utiliza músicas comerciais ou gravações externas.
+- Controles flutuantes de áudio com margem segura, responsivos a telas pequenas.
+- Ativação/desativação independente de efeitos e música.
+- Controle separado de volume e persistência local das preferências.
+- Sons discretos de navegação, sons mais energéticos em ações ligadas a partidas/sorteios e sinais de sucesso/erro nas mensagens de status.
+- Integrado globalmente à Activity atual, cobrindo Central, Dashboard e interface de sorteios.
+
+INSTALAÇÃO
+1. Faça backup dos arquivos atuais.
+2. Extraia este ZIP na raiz do projeto da Minako, mantendo os diretórios e substituindo os arquivos indicados.
+3. No Console da Shard Cloud, na raiz do projeto, execute:
+   npm --prefix activity run build
+4. Se o build terminar com sucesso, reinicie/republique a aplicação conforme as opções da hospedagem.
+5. Abra a Activity dentro do Discord e use o botão “Áudio” no canto inferior direito. A música não começa automaticamente; é necessário ativá-la pelo controle, em conformidade com as políticas de reprodução dos navegadores.
+
+ARQUIVOS INCLUÍDOS
+- activity/src/App.jsx (modificado: inclui o controle global de áudio)
+- activity/src/styles.css (modificado: estilos do painel e margem segura)
+- activity/src/audio/AudioControls.jsx (novo)
+- activity/src/audio/audioEngine.js (novo)
+
+SEGURANÇA E COMPATIBILIDADE
+- Nenhum segredo, token ou variável de ambiente é incluído.
+- Não modifica backend, banco de dados, comandos do bot ou schema PostgreSQL.
+- Áudio sintetizado localmente; não requer downloads, serviços externos ou arquivos musicais de terceiros.
+- Preferências guardadas no armazenamento local do dispositivo/navegador.
+- Se o cliente do Discord bloquear Web Audio, o restante da Activity continua funcionando.
+
+VALIDAÇÃO
+A sintaxe do módulo de áudio foi verificada com Node.js. O build Vite completo não foi validado neste ambiente porque a instalação de dependências excedeu o tempo limite; execute o comando de build na hospedagem antes de publicar.

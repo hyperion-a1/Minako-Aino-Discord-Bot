@@ -1,0 +1,26 @@
+PATCH — SELETORES DE CANAIS/CARGOS/CATEGORIAS + EFEITOS SONOROS E VISUAIS
+(Cumulativo: inclui o patch de acesso web. Substitua os arquivos abaixo preservando os diretórios.)
+
+ARQUIVOS
+- activity/server.mjs      (novo endpoint GET /api/dashboard/guild-data, restrito a administradores)
+- activity/src/App.jsx     (componente PickField; campos de ID viram seletores)
+- activity/src/WebApp.jsx  (inclui efeitos e controles de áudio)
+- activity/src/Fx.jsx      (NOVO: faíscas ao clicar)
+- activity/src/styles.css  (estilos dos seletores e animações)
+
+O QUE MUDA
+- Canais, categorias e cargos agora são escolhidos em listas com busca (várias seleções onde cabe: Modo Noturno, cargos de partidas e de sorteios).
+- Os valores continuam sendo salvos como IDs, então banco e bot não mudam.
+- Seletores valem no site e na Activity (a Dashboard é a mesma).
+- Se a lista não carregar, o campo volta a aceitar o ID numérico.
+- Site: controles de áudio da Minako (efeitos nos botões, música ambiente opcional, som de sucesso/erro), faíscas ao clicar, entrada animada das telas, brilho nos botões e estrelas flutuando na página inicial. "Reduzir movimento" do sistema desativa as animações.
+
+REQUISITOS
+- MINAKO_TOKEN no ambiente do site (o bot lê canais e cargos do servidor). Sem ele, os campos continuam por ID.
+- Rebuild: npm --prefix activity run build, depois reinicie.
+
+LIMITES
+- Membros permitidos/bloqueados dos sorteios continuam por ID (a busca de membros fica para uma etapa futura).
+- Tópicos (threads) não aparecem na lista; o canal de sorteio aceita canais de texto, anúncio e fóruns.
+- A lista de canais/cargos é guardada por 60 s; mudanças recentes no Discord podem demorar um pouco para aparecer.
+- Efeitos e seletores não foram testados no navegador real aqui: valide após publicar.

@@ -1,0 +1,51 @@
+MINAKO AINO — PATCH 1: FUNDAÇÃO DO TIKTOK WATCHER
+=================================================
+
+BASE
+----
+Este patch foi preparado sobre minako_03-11-2026.zip.
+É incremental: contém somente arquivos novos e o index.js/.env.example atualizados.
+Preserve os diretórios ao enviar o ZIP para a hospedagem.
+
+O QUE ESTA ETAPA ENTREGA
+------------------------
+- Cria a estrutura PostgreSQL isolada do TikTok Watcher, com prefixo minako_tiktok_.
+- Prepara configurações por servidor (canal, alertas, intervalo e limite de contas).
+- Prepara cadastro/solicitação de criadores e estados pending/approved/rejected.
+- Registra a separação entre aprovação administrativa e conexão OAuth do titular.
+- Prepara armazenamento de eventos com chave única para impedir notificações duplicadas.
+- Prepara a tabela de estados OAuth para uso na próxima etapa.
+- Inicializa o schema automaticamente após o schema principal da Minako.
+- Não altera app_data nem tabelas de outros módulos.
+
+MODELO DE AUTORIZAÇÃO
+---------------------
+O modo configurado é híbrido. Administradores poderão cadastrar/aprovar diretamente
+na etapa de comandos; membros poderão solicitar inclusão. Em ambos os casos, a conta
+TikTok deverá ser conectada pelo próprio titular via OAuth antes do monitoramento.
+
+CONFIGURAÇÃO
+------------
+Nenhuma variável nova é obrigatória nesta etapa. O .env.example contém apenas os
+nomes reservados para a futura integração OAuth:
+- TIKTOK_CLIENT_KEY
+- TIKTOK_CLIENT_SECRET
+- TIKTOK_REDIRECT_URI
+- TIKTOK_TOKEN_ENCRYPTION_KEY
+
+Não copie segredos para o ZIP. Configure valores reais somente no painel seguro da
+Shard Cloud quando a etapa OAuth for implementada.
+
+INSTALAÇÃO
+----------
+1. Faça backup dos arquivos atuais da Minako.
+2. Envie o conteúdo deste ZIP para a raiz do projeto, preservando os diretórios.
+3. Não substitua o .env da hospedagem pelo .env.example.
+4. Reinicie a aplicação.
+5. Verifique o log: [Minako] TikTok Watcher: estrutura PostgreSQL pronta.
+
+OBSERVAÇÕES
+-----------
+Esta etapa não registra comandos Discord e não consulta o TikTok ainda.
+O monitor de vídeos, OAuth e detecção experimental de lives serão entregues em patches
+posteriores. O intervalo padrão preparado é de 5 minutos e o limite máximo é 10 contas.

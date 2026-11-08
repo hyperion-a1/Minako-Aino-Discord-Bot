@@ -1,0 +1,17 @@
+ACTIVITY INICIAL DA MINAKO — CENTRAL GAMER
+==========================================
+
+Foi adicionada a pasta activity/ com a estrutura inicial de uma Discord Activity em React + Vite, um backend Express e integração de leitura com o módulo existente de matchmaking/PostgreSQL.
+
+IMPORTANTE: este ZIP preserva os arquivos existentes da Minako e adiciona a Activity em uma pasta independente. A Activity ainda precisa ser configurada no Discord Developer Portal e testada em um cliente Discord; não fica publicada automaticamente apenas por enviar os arquivos à hospedagem.
+
+PRIMEIROS PASSOS
+1. Abra activity/README.md e siga as instruções completas.
+2. Copie activity/.env.example para activity/.env.
+3. Configure o Application/Client ID, o OAuth2 Client Secret e a mesma DATABASE_URL PostgreSQL utilizada pela Minako.
+4. Na pasta activity/, execute npm install e npm run dev em um ambiente com Node.js 20+.
+5. Configure Activities, OAuth2 Redirect URI e URL Mapping no Discord Developer Portal conforme a documentação oficial.
+
+A primeira versão é de leitura: mostra a estrutura da Central e, após autenticação, consulta contagens agregadas e grupos do módulo de matchmaking. Ela não cria grupos, não altera disponibilidade e não modifica partidas. Esses comandos serão adicionados depois de validar o primeiro fluxo dentro do Discord.
+
+Documentação oficial: https://docs.discord.com/developers/activities/building-an-activity

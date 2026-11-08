@@ -1,0 +1,54 @@
+MINAKO AINO — PATCH 03: MONITORAMENTO AUTOMÁTICO DE VÍDEOS TIKTOK
+
+Este ZIP contém somente os arquivos novos ou alterados, mantendo os caminhos
+relativos do projeto original. Faça o upload/extrair sobre a raiz atual do bot,
+substituindo os arquivos existentes quando solicitado. Não apague o projeto.
+
+ARQUIVOS INCLUÍDOS
+- utils/tiktok_video_monitor.js (novo)
+- utils/tiktok_store.js (alterado)
+- utils/tiktok_schema.js (alterado)
+- index.js (alterado)
+- package.json (alterado: inclui teste do monitor)
+- tests/tiktokVideoMonitor.test.js (novo)
+- LEIA-ME-PATCH-TIKTOK-03.txt (novo)
+
+O QUE O PATCH FAZ
+1. Inicia o monitor no processo principal da Minako, depois de preparar o schema.
+2. Verifica as contas aprovadas e conectadas; cada servidor respeita seu intervalo
+   configurado (mínimo de 5 minutos). O agendador acorda uma vez por minuto.
+3. Consulta a TikTok Display API video.list, com limite de 20 vídeos recentes por
+   consulta, usando os tokens protegidos e o gerenciador de renovação já existente.
+4. A primeira consulta de cada conta é uma linha de base: registra os vídeos já
+   existentes sem enviar notificações retroativas.
+5. Nas consultas seguintes, identifica vídeos novos, com pequena janela de
+   sobreposição para reduzir o risco de perder publicações na fronteira do ciclo.
+6. Envia uma mensagem rica ao canal definido por /tiktok canal.
+7. Mantém a chave única por evento e estado de entrega para evitar duplicações e
+   permitir nova tentativa quando o envio ao Discord falhar.
+8. Registra erros por conta em last_error (/tiktok listar) sem interromper outras
+   contas monitoradas.
+9. Encerra o temporizador junto com o processo da Minako.
+
+INSTALAÇÃO
+- Envie o ZIP para a raiz da aplicação na Shard Cloud e extraia preservando pastas.
+- Não altere nem substitua o .env; nenhuma variável nova é exigida neste patch.
+- Reinicie a aplicação. A migração adiciona delivery_status e delivery_error à
+  tabela minako_tiktok_events, sem apagar os eventos existentes.
+- No Discord, execute /tiktok canal e selecione o canal de notificações.
+- Execute /tiktok listar e confirme que a conta de teste está approved / connected.
+
+TESTE RECOMENDADO
+- Ao iniciar, o primeiro ciclo faz a linha de base. Aguarde o log:
+  [Minako] TikTok Video Monitor iniciado ...
+  e depois o log [TikTok] @usuario: N vídeo(s) consultado(s) ... (linha de base).
+- Publique um vídeo novo na conta teste depois da linha de base.
+- Aguarde até 5 minutos (mais o tempo de propagação da API) e confira o canal.
+- Reiniciar a Minako não deve repetir a notificação do mesmo vídeo.
+
+OBSERVAÇÕES
+- A Display API pode levar algum tempo para disponibilizar uma publicação recém-criada.
+- A consulta usa os 20 vídeos mais recentes; para contas com volume excepcional de
+  publicações entre ciclos, uma etapa futura pode implementar paginação.
+- Este patch monitora VÍDEOS. A detecção de LIVE continua desativada/não implementada.
+- A conta precisa permanecer autorizada com user.info.basic e video.list.

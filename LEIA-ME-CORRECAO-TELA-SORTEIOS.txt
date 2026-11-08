@@ -1,0 +1,16 @@
+CORREÇÃO — TELA EM BRANCO NO MÓDULO DE SORTEIOS (v2026.11.05-6)
+(Cumulativo: inclui todos os patches anteriores. Substitua preservando os diretórios, rode
+ npm --prefix activity run build e reinicie.)
+
+CAUSA
+O seletor "Templates desta sessão" (código de demonstração que já vinha no App.jsx) mapeava
+templates como texto, mas o banco devolve objetos {id, name}. React não consegue desenhar um
+objeto e derruba a página inteira. Isso só aparecia depois que existia algum template salvo.
+
+CORREÇÃO
+- A seção Sorteios agora usa os templates reais: escolher carrega o template do PostgreSQL;
+  "Salvar como template" e "Excluir template selecionado" usam as rotas reais.
+- Rede de segurança: um erro de renderização agora mostra um aviso com "Tentar de novo" em vez
+  de uma tela vazia (na Dashboard inteira e, separado, no bloco "Publicar pelo bot").
+- Respostas inesperadas do servidor (por exemplo, servidor sem reiniciar após o patch) viram
+  mensagem legível em vez de erro.

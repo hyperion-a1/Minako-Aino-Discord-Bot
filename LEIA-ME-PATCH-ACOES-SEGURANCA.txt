@@ -1,0 +1,37 @@
+PATCH — AÇÕES DE SEGURANÇA NATIVAS DO DISCORD NO MODO NOTURNO
+
+ARQUIVOS INCLUÍDOS (somente novos/alterados):
+- activity/src/App.jsx
+- activity/server.mjs
+- utils/nightlyScheduler.js
+- utils/securityActions.js (novo)
+- tests/securityActions.test.js (novo)
+
+O QUE FOI ADICIONADO
+- Duas opções independentes no painel administrativo do Modo Noturno: Pausar convites e Pausar DMs.
+- Duração configurável de 1, 2, 4, 8, 12 ou 24 horas.
+- As duas opções ficam desativadas por padrão e só passam a ser administradas pela Minako depois que o administrador interage com alguma delas ou com a duração e salva as configurações.
+- A Minako usa o endpoint oficial PUT /guilds/{guild.id}/incident-actions, exigindo a permissão Gerenciar Servidor (MANAGE_GUILD).
+- A Minako renova a pausa automaticamente antes do vencimento enquanto a opção estiver ligada. Ao desligar uma opção e salvar, a Minako envia null para removê-la.
+- A configuração é persistida no JSONB minako_activity_dashboard_settings, por servidor.
+
+COMPORTAMENTO DO DISCORD
+- O endpoint aceita no máximo 24 horas por solicitação.
+- Pausar DMs afeta membros que não são amigos; exceções nativas do Discord, como amigos, moderadores e bots, continuam válidas.
+- Pausar convites impede novas entradas por convites durante o período, sem revogar os links existentes.
+
+INSTALAÇÃO
+1. Faça backup do projeto e do PostgreSQL.
+2. Extraia este ZIP na raiz do projeto, preservando os diretórios e substituindo os arquivos indicados.
+3. Publique/reinicie a Minako e a Activity. Não é necessário deploy de comandos slash.
+4. No Discord, confirme que a Minako possui Gerenciar Servidor.
+5. Abra a Dashboard > Modo Noturno, habilite as opções desejadas, selecione a duração e clique em Salvar alterações.
+
+VALIDAÇÃO
+- node --check utils/securityActions.js
+- node --check utils/nightlyScheduler.js
+- node --check activity/server.mjs
+- node tests/securityActions.test.js
+
+OBSERVAÇÃO
+As Ações de Segurança são independentes do bloqueio de canais do Modo Noturno. Se ambas estiverem ativadas, cada uma opera conforme suas próprias configurações.

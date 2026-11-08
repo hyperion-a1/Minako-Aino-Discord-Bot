@@ -1,0 +1,19 @@
+CORREÇÃO — AGENDAMENTO NO MESMO DIA + DIAGNÓSTICO DE BANCO NA ACTIVITY (v2026.11.05-7)
+(Cumulativo. Substitua preservando os diretórios, rode npm --prefix activity run build e reinicie.)
+
+1) AGENDAMENTO NO MESMO DIA
+Causa: o campo de data não tem fuso. O servidor (UTC) o lia como UTC, mas o bot trabalha em horário de Brasília.
+Ex.: 15h em Brasília = 18h UTC; agendar para 17h virava "17h UTC", que já passou, e o sorteio era recusado.
+Agora o servidor interpreta data de início e de conclusão no fuso America/Sao_Paulo e converte de volta ao carregar.
+Os campos informam "Horário de Brasília". Para outro fuso: variável GIVEAWAY_TIMEZONE (ex.: America/Manaus).
+Observação: datas já salvas antes desta correção em templates/configurações podem aparecer deslocadas; reabra e confirme o horário.
+
+2) ACTIVITY SEM CONEXÃO COM O BANCO
+Não encontrei alteração minha no caminho que a Activity usa para o banco. O que havia era falta de diagnóstico: a falha
+chegava como "Não foi possível carregar as configurações" sem motivo. Agora:
+- O servidor traduz o erro do PostgreSQL (conexão recusada, endereço não encontrado, senha incorreta, banco inexistente,
+  limite de conexões, SSL...) sem expor host, usuário ou senha.
+- A Dashboard (Activity e site) mostra "Sem conexão com os dados do servidor" com o motivo e botão "Tentar de novo".
+- /api/health informa database ("ok", "error" ou "disabled") e databaseHint.
+Se a mensagem apontar para DATABASE_URL, corrija a variável na hospedagem e reinicie.
+Se disser que o banco respondeu normalmente, o problema é de permissão (precisa ser administrador) ou de sessão do Discord.

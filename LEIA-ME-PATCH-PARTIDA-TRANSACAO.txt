@@ -1,0 +1,37 @@
+AMI MIZUNO — PATCH INCREMENTAL /partida: TRANSAÇÃO DO POSTGRESQL
+
+Base
+- Feito sobre o patch-partida-persistencia.zip que você confirmou estar instalado.
+- Inclui os arquivos utilitários atuais necessários para manter o patch alinhado com essa versão.
+
+O que muda
+- A gravação de minako_matches passa a usar uma transação explícita no PostgreSQL.
+- A linha singleton é criada apenas se ainda não existir, bloqueada com FOR UPDATE e atualizada em uma única transação.
+- Em caso de erro, há tentativa de ROLLBACK e o erro é propagado para o matchStore, que mantém o tratamento de falha já existente.
+- Não apaga nem recria tabelas e não altera o formato do payload JSONB.
+- A fila de gravação e a gravação atômica do JSON local permanecem como no patch anterior.
+
+Limite importante
+Esta atualização torna cada gravação do payload atômica e serializa as gravações concorrentes da linha no PostgreSQL. Ela NÃO resolve, por si só, todo conflito de leitura-modificação-gravação: se duas ações lerem o mesmo estado antigo e depois gravarem snapshots diferentes, a última ainda pode prevalecer. A proteção completa contra esse tipo de conflito exige refatorar os fluxos para executar as mutações sobre o estado mais recente dentro de uma operação coordenada. Não estou declarando esse problema totalmente resolvido neste patch.
+
+Instalação (Termux)
+1. Faça um backup do projeto atual.
+2. Extraia o ZIP na raiz do projeto:
+   cd ~/projetos/'Ami Mizuno'
+   unzip -o ~/storage/downloads/patch-partida-transacao.zip -d .
+3. Rode verificações de sintaxe:
+   node --check utils/db.js
+   node --check utils/matchStore.js
+   node --check utils/serialQueue.js
+4. Rode a suíte:
+   npm test
+5. Reinicie a instância existente do bot. Não inicie uma segunda instância em paralelo.
+
+Validação sugerida após reiniciar
+- Partida aberta antes do deploy continua visível.
+- Um membro entra, desiste e entra novamente.
+- A staff adiciona e remove um participante.
+- Concluir/cancelar uma partida continua funcionando.
+- Verifique o console e confirme que não há erros de persistência.
+
+Se houver erro de banco, guarde o log completo e não aplique correções manuais no banco antes de revisar o erro.

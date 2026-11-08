@@ -1,0 +1,43 @@
+PATCH — DASHBOARD ADMINISTRATIVA REAL DA MINAKO
+
+Este patch conecta a Dashboard da Activity ao PostgreSQL e adiciona espaçamento adaptável às bordas da Activity no Discord.
+
+ARQUIVOS INCLUÍDOS (somente novos/alterados):
+- activity/server.mjs
+- activity/src/App.jsx
+- activity/src/styles.css
+
+O QUE PASSA A FUNCIONAR
+- Verificação da sessão Discord e do privilégio Administrator do servidor antes de permitir ler/gravar a Dashboard.
+- Leitura e gravação por servidor no PostgreSQL.
+- Configurações mapeadas para as tabelas existentes: semana/ciclo, canais gerais, Modo Noturno, pacotes sazonais, cargos e canal da Central de Matchmaking.
+- Persistência de outros campos da Dashboard numa tabela nova, isolada por guild_id: minako_activity_dashboard_settings.
+- Criar, listar, carregar e excluir templates de sorteios usando a tabela existente minako_giveaway_templates.
+- Criação idempotente da tabela de configurações da Dashboard e inicialização do schema existente de sorteios.
+- Ajustes de safe-area/margens para evitar controles colados às bordas em Activities móveis.
+- Em produção, a porta padrão passa a ser 80 se a plataforma não definir PORT. Se a Shard Cloud fornecer PORT, ela é respeitada.
+
+ANTES DE PUBLICAR
+1. Faça backup do projeto e do banco.
+2. Extraia este ZIP na raiz do projeto, preservando os diretórios e substituindo os três arquivos listados.
+3. Confirme nas variáveis de ambiente da aplicação Activity:
+   - DATABASE_URL: a mesma conexão PostgreSQL usada pela Minako;
+   - DISCORD_CLIENT_ID;
+   - DISCORD_CLIENT_SECRET;
+   - VITE_DISCORD_CLIENT_ID durante o build;
+   - PORT, se a Shard Cloud definir uma porta para a aplicação.
+4. Não exponha DISCORD_CLIENT_SECRET no frontend e não use prefixo VITE_ nele.
+5. Execute: npm --prefix activity run build
+6. Reinicie/republique a Activity e teste dentro do Discord com uma conta que tenha permissão Administrator no servidor.
+
+LIMITES DESTA ETAPA
+- A Activity salva no banco as configurações e os templates; ainda não cria/publica um sorteio ao vivo no Discord. Essa ação requer integrar a criação com o cliente/fluxo de publicação do módulo de sorteios da Minako.
+- Campos de canais, cargos e membros aceitam IDs numéricos do Discord (não nomes ou menções). A interface ainda não tem seletores nativos para escolher esses objetos.
+- Alguns campos específicos de matchmaking/sorteios são persistidos como configuração da Dashboard, mas não alteram automaticamente lógica que ainda não tenha um campo equivalente nos módulos existentes.
+- A autorização usa as permissões que o endpoint OAuth2 /users/@me/guilds devolve. O usuário precisa autorizar os escopos identify e guilds.
+- Não execute npm audit fix --force como parte deste patch. Avalie separadamente as vulnerabilidades de dependências.
+
+VALIDAÇÃO FEITA NESTE AMBIENTE
+- node --check activity/server.mjs: aprovado.
+- Sintaxe JSX de activity/src/App.jsx verificada via TypeScript transpileModule: aprovado.
+- Não foi possível executar o build Vite neste ambiente porque a instalação de dependências excedeu o tempo limite; compile na hospedagem antes de testar.

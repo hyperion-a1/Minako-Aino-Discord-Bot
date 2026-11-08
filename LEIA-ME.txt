@@ -1,0 +1,18 @@
+PATCH — CORREÇÃO DO DEPLOY DE COMANDOS DA MINAKO
+
+Conteúdo:
+- deploy-commands.js (substitui o arquivo existente na raiz do projeto)
+
+Instalação:
+1. Faça backup do deploy-commands.js atual.
+2. Extraia este ZIP na raiz da aplicação, preservando a estrutura.
+3. Confirme que o arquivo ficou em /app/deploy-commands.js.
+4. Execute: npm run deploy
+
+O que muda:
+- Não usa mais bulk overwrite global com body vazio.
+- Lista os comandos globais existentes e remove individualmente os comandos antigos.
+- Preserva o comando Entry Point da Discord Activity (tipo 4).
+- Sincroniza os comandos de servidor da Minako, incluindo /tiktok.
+
+Não contém tokens, Client Secret ou outras credenciais.

@@ -1,0 +1,24 @@
+{
+  "name": "minako-estrelas-semana",
+  "version": "1.0.0",
+  "description": "Minako Aino — Estrelas da Semana para a comunidade Honor of Kings",
+  "main": "index.js",
+  "type": "commonjs",
+  "workspaces": [
+    "activity"
+  ],
+  "scripts": {
+    "activity:build": "npm --workspace activity run build",
+    "activity:start": "npm --workspace activity run start",
+    "postinstall": "npm run activity:build",
+    "start": "concurrently -k -n minako,activity -c blue,green \"node index.js\" \"NODE_ENV=production PORT=80 node activity/server.mjs\"",
+    "deploy": "node deploy-commands.js",
+    "test": "node tests/nightModeCore.test.js && node tests/nightMode.integration.test.js && node tests/nightMode.category.integration.test.js && node tests/nightMode.reconfiguration.test.js && node tests/nightMode.regression.test.js && node tests/nightMode.scope.test.js && node tests/nightMode.configScope.test.js && node tests/personalityEngine.test.js && node tests/configInteractionRouting.test.js && node tests/serialQueue.test.js && node tests/matchMutation.test.js && node tests/rankingHistory.test.js && node tests/giveawayCore.test.js && node tests/giveawaySmoke.test.js && node tests/giveawayVoice.test.js && node tests/giveawayRedraw.test.js && node tests/giveawayRoles.test.js && node tests/mmCore.test.js && node tests/mmCentralView.test.js && node tests/mmCentral.test.js && node tests/mmPlayFlow.test.js && node tests/mmGroupView.test.js && node tests/mmGroupFlow.test.js && node tests/mmMatchFlow.test.js && node tests/mmConfigParse.test.js && node tests/mmConfigPanel.test.js && node tests/mmBackup.test.js && node tests/mmRelease11.test.js && node tests/mmSocialCore.test.js && node tests/mmSocialFlow.test.js && node tests/mmTeams.test.js && node tests/mmTeamFlow.test.js && node tests/mmReliability.test.js && node tests/mmReliabilityFlow.test.js && node tests/mmNotifyPolicy.test.js && node tests/mmEngagement.test.js && node tests/tiktokFoundation.test.js && node tests/tiktokOAuth.test.js && node tests/tiktokVideoMonitor.test.js && node tests/tiktokLiveAnnouncement.test.js && node tests/tiktokConfigPanel.test.js"
+  },
+  "dependencies": {
+    "concurrently": "^9.2.1",
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5",
+    "pg": "^8.13.1"
+  }
+}

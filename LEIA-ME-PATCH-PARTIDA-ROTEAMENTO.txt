@@ -1,0 +1,44 @@
+PATCH — CONFIABILIDADE E ROTEAMENTO DO MÓDULO /PARTIDA
+Base: minako_10-10-2026.zip + correção anterior de confirmação da interação
+
+ARQUIVOS INCLUÍDOS
+- index.js
+- commands/partida.js
+
+O QUE MUDA
+1. Corrige o roteamento global: o módulo editorial só recebe botões, menus e modais cujo customId começa com "minako:".
+2. Menus de seleção de rota e outros componentes com customId "partida:..." deixam de ser encaminhados indevidamente ao módulo editorial.
+3. Mantém a confirmação antecipada da seleção de rota com deferUpdate(), evitando tentar responder à mesma interação duas vezes.
+4. Mantém a atualização da resposta privada separada da atualização do painel público.
+5. Não altera schema, formato dos dados, IDs de partidas, regras de alocação ou persistência das partidas existentes.
+
+POR QUE CORRIGE O ERRO
+O roteador anterior encaminhava qualquer StringSelectMenu ou modal não reconhecido pelos roteadores específicos ao módulo editorial. Esse módulo respondia com a mensagem de permissão "Só quem tem Gerenciar Servidor...". Enquanto isso, o coletor de /partida também recebia a seleção e tentava processá-la, podendo resultar em Unknown interaction. Agora o módulo editorial só recebe customIds do seu próprio prefixo.
+
+INSTALAÇÃO (Termux)
+1. Faça uma cópia de segurança do projeto.
+2. Extraia o ZIP na raiz do projeto:
+   cd ~/projetos/'Ami Mizuno'
+   unzip -o ~/storage/downloads/patch-partida-roteamento.zip -d .
+3. Valide a sintaxe:
+   node --check index.js
+   node --check commands/partida.js
+4. Reinicie o bot pelo método habitual de hospedagem. Não inicie uma segunda instância se o processo antigo ainda estiver ativo.
+
+IMPACTO NAS PARTIDAS EM ANDAMENTO
+O patch não apaga, recria nem migra partidas. Mantém a estrutura atual dos dados. Como qualquer implantação que substitui arquivos do bot, exige reinício, causando uma breve interrupção no atendimento das interações. Faça a instalação preferencialmente em horário de menor movimento.
+
+TESTES REALIZADOS NA PREPARAÇÃO
+- node --check index.js: OK
+- node --check commands/partida.js: OK
+- npm test: OK (todos os testes existentes)
+
+VALIDAÇÃO RECOMENDADA NO DISCORD
+- Conta não-staff entra numa partida e escolhe rota; confirme que não aparece mensagem de permissão editorial.
+- A conta desiste e entra novamente; confirme que a escolha da rota funciona.
+- Confirme que o painel público atualiza após entrar e desistir.
+- Teste os botões administrativos/editoriais para verificar que continuam funcionando para usuários autorizados.
+- Confira os logs por novos erros Unknown interaction.
+
+OBSERVAÇÃO
+Os testes existentes passaram, mas não são testes de integração completos do fluxo ao vivo no Discord. A validação pós-instalação continua necessária. Este ZIP inclui também a correção de confirmação da interação do patch anterior, portanto substitui aquele patch para este conjunto de arquivos.

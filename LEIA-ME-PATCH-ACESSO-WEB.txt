@@ -1,0 +1,25 @@
+PATCH — ACESSO PELO NAVEGADOR (Entrar com Discord + seleção de servidor + Dashboard)
+
+ARQUIVOS (substituir/adicionar, preservando diretórios):
+- activity/server.mjs       (alterado: rotas /auth/login, /auth/callback, /auth/logout, /api/session, /api/web/guilds; autorização aceita Bearer OU cookie)
+- activity/src/App.jsx      (alterado: Activity intacta; detecta frame_id e escolhe Activity ou site)
+- activity/src/WebApp.jsx   (NOVO: página inicial, login, seletor de servidor, Dashboard)
+- activity/src/styles.css   (alterado: estilos adicionados ao final)
+
+ANTES DE PUBLICAR
+1. Developer Portal → OAuth2 → Redirects: ADICIONE https://SEU-SUBDOMINIO/auth/callback (mantenha o redirect atual da Activity).
+2. Opcional, recomendado: variável SITE_URL=https://SEU-SUBDOMINIO (sem barra final). Sem ela, o endereço é deduzido dos cabeçalhos do proxy.
+3. Confirme MINAKO_TOKEN no ambiente: é usado para listar só servidores onde a Minako está. Sem ele, lista todos onde você é admin.
+4. Rebuild: npm --prefix activity run build   e reinicie.
+
+COMO FUNCIONA
+- URL com frame_id (Activity no Discord) → fluxo atual, sem mudanças.
+- Navegador → landing → Entrar com Discord (scopes identify + guilds) → seleção de servidor → Dashboard.
+- Token do Discord fica só no servidor; o navegador recebe cookie HttpOnly/Secure/SameSite=Lax. Escritas via cookie exigem token CSRF.
+- Mesma API, mesmo banco e mesma checagem de Administrator nas duas versões.
+
+LIMITES
+- Sessões ficam em memória: reiniciar o servidor desconecta quem está logado no site (basta entrar de novo).
+- No navegador só a Dashboard está disponível; a Central de Matchmaking continua na Activity.
+- Não testado com Discord real aqui: valide o login em uma conta administradora após publicar.
+- Rate limit de login é em memória, por IP.
