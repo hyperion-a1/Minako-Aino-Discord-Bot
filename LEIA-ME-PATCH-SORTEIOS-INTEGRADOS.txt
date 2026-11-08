@@ -1,0 +1,20 @@
+PATCH — SORTEIOS INTEGRADOS + DIAGNÓSTICO DOS SELETORES
+(Cumulativo: inclui todos os patches anteriores. Substitua os arquivos preservando os diretórios.)
+
+1) SORTEIOS (aba Sorteios da Dashboard)
+- Novo bloco "Publicar pelo bot": botão "Criar sorteio agora" (ou "Agendar sorteio", se o início for agendado).
+- O site valida com o mesmo core do /sorteios (giveawayCore.validateConfig), confere se o canal existe no servidor e grava o sorteio no banco (minako_giveaways). O agendador do bot (a cada 15 s) publica a mensagem no canal e cuida do resto: botões, sorteio, anúncio, tópico privado. Você é o "host".
+- Lista dos sorteios ativos/agendados do servidor, com "Cancelar" para os ainda não publicados. Sorteios já publicados continuam sendo encerrados/cancelados pelo /sorteios no Discord.
+- Se o bot não tiver permissão no canal, a publicação falha e ele avisa o host por DM (comportamento do agendador existente).
+- O canal do sorteio aceita canais de texto, anúncios e tópicos ativos (fóruns não servem).
+
+2) POR QUE OS SELETORES VOLTAM A PEDIR ID
+O site só mostra IDs quando NÃO consegue carregar a lista de canais/cargos. Como reconhecer:
+- Rótulo "Canal de moderação (ID)"  → a interface é a nova, mas a lista falhou. Agora um aviso "Seletores indisponíveis" mostra o motivo, com botão "Tentar de novo". Causas comuns: MINAKO_TOKEN ausente no ambiente do site ou bot fora do servidor.
+- Rótulo "ID do canal de moderação" → você está vendo uma interface ANTIGA: o build não foi refeito. O servidor serve activity/dist, então é preciso rodar: npm --prefix activity run build   e reiniciar. O servidor agora registra um aviso no log quando dist está mais antigo que src.
+- A versão da interface aparece no topo do site (v2026.11.05-5). Se não aparecer, o build é antigo.
+- /api/health agora também informa "distStale": true quando o build está desatualizado.
+
+LIMITES
+- Cargos de prêmio para ganhadores continuam só pelo /sorteios (aba Prêmios do painel do Discord).
+- Não testado com Discord real. Validei a conversão e as regras com o módulo real de sorteios, não a publicação no canal.

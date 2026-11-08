@@ -1,0 +1,91 @@
+MINAKO AINO — TIKTOK WATCHER | PATCH DE TESTE OAUTH + DISPLAY API
+===================================================================
+
+BASE
+----
+Preparado sobre minako_03-11-2026.zip. Este ZIP consolidado inclui a fundação
+PostgreSQL e a etapa OAuth. Ele substitui a necessidade de instalar os antigos
+patches TikTok 01 e 02 separadamente. Envie o conteúdo para a raiz do projeto,
+preservando os diretórios.
+
+O QUE ESTA VERSÃO FAZ
+---------------------
+- Cria tabelas isoladas com prefixo minako_tiktok_; não altera app_data nem tabelas
+  de outros módulos.
+- Registra o comando /tiktok com solicitação, cadastro/aprovação administrativa,
+  conexão/desconexão do titular, listagem e escolha do canal.
+- Implementa OAuth Web do TikTok com state aleatório de uso único.
+- Criptografa access_token e refresh_token com AES-256-GCM no PostgreSQL.
+- Implementa callback HTTPS em /api/tiktok/callback.
+- Após o OAuth, testa GET /v2/user/info/ e POST /v2/video/list/ (até cinco vídeos).
+  A página de retorno informa separadamente se OAuth e listagem de vídeos funcionaram.
+- Não ativa ainda o monitoramento periódico nem notificações automáticas; isso será
+  uma etapa posterior, após confirmarmos o acesso real à Display API.
+
+IMPORTANTE SOBRE O TIKTOK DEVELOPER PORTAL
+------------------------------------------
+No Sandbox mostrado pelo usuário, Login Kit está adicionado e os escopos
+user.info.basic e video.list aparecem selecionados. A opção Display API não aparece
+na lista de produtos. Não adicione produtos não relacionados para tentar substituí-la.
+O teste real de video.list feito no callback ajudará a identificar se o Sandbox
+concede acesso ou retorna erro de produto/escopo. A presença do escopo no portal,
+sozinha, não garante que a API aceitará a chamada.
+
+CONFIGURAÇÃO DO REDIRECT URI
+----------------------------
+No Sandbox, adicione este Redirect URI exato (não use a raiz do domínio):
+https://minako-aino.shardweb.app/api/tiktok/callback
+
+Mantenha a URL do site Web/Desktop como:
+https://minako-aino.shardweb.app/
+
+Não remova outros Redirect URIs que ainda sejam usados por outras integrações.
+O callback acima deve estar cadastrado no Login Kit e ser idêntico à variável
+TIKTOK_REDIRECT_URI na hospedagem.
+
+VARIÁVEIS NO PAINEL SEGURO DA SHARD CLOUD
+-----------------------------------------
+TIKTOK_CLIENT_KEY= (Client Key do app TikTok)
+TIKTOK_CLIENT_SECRET= (Client Secret do app TikTok)
+TIKTOK_REDIRECT_URI=https://minako-aino.shardweb.app/api/tiktok/callback
+TIKTOK_TOKEN_ENCRYPTION_KEY= (64 caracteres hexadecimais)
+
+Gere a chave com:
+node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
+
+Guarde a chave. Não a envie por Discord, conversa ou ZIP. Não substitua o .env real
+pelo .env.example e não coloque segredos no ZIP.
+
+INSTALAÇÃO E TESTE
+------------------
+1. Faça backup dos arquivos atuais.
+2. Envie este ZIP para a raiz do projeto, preservando os diretórios.
+3. Configure as quatro variáveis acima no painel seguro da hospedagem.
+4. No TikTok Sandbox, adicione o Redirect URI exato indicado acima e aplique as
+   alterações.
+5. Reinicie a Minako. Confirme no log: TikTok Watcher: estrutura PostgreSQL pronta.
+6. Execute node deploy-commands.js para registrar /tiktok no servidor configurado.
+7. No Discord, use /tiktok adicionar membro:<conta de teste> perfil:<username>.
+   Como alternativa, o titular pode usar /tiktok solicitar perfil:<username> e um
+   administrador aprova com /tiktok aprovar id:<id>.
+8. O titular executa /tiktok conectar id:<id>, abre o link privado e autoriza no TikTok.
+9. A página de retorno informa se a autorização OAuth foi concluída e se a consulta
+   video.list foi aceita.
+10. No Discord, /tiktok listar confirma o estado da conexão.
+
+RESULTADOS POSSÍVEIS
+--------------------
+- OAuth + Display API testados: a autorização e a chamada video.list funcionaram.
+- OAuth conectado; teste da Display API pendente: OAuth funcionou, mas a API de vídeos
+  retornou erro. Anote o código exibido/logado para investigarmos a permissão/produto.
+- Erro no callback/troca de código: confira Client Key, Secret, Redirect URI, Sandbox
+  e os logs da Activity. Gere um novo link /tiktok conectar; state é de uso único.
+
+SEGURANÇA E LIMITES
+-------------------
+- Somente o titular autoriza a própria conta. Nunca solicite senha TikTok.
+- Os tokens ficam criptografados no banco. A chave de criptografia não pode ser perdida
+  ou trocada sem migração dos tokens.
+- O intervalo de cinco minutos está reservado nas configurações, mas o scheduler de
+  vídeos ainda não foi ativado neste patch. Não há notificações automáticas ainda.
+- O monitoramento de LIVE permanece experimental e separado.

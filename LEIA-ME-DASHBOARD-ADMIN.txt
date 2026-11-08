@@ -1,0 +1,29 @@
+PATCH — DASHBOARD ADMINISTRATIVA DA MINAKO (PROTÓTIPO)
+
+Conteúdo do ZIP:
+- activity/src/App.jsx
+- activity/src/styles.css
+
+O que esta etapa adiciona:
+- Navegação entre a Central de Matchmaking e a Dashboard.
+- Painel visual com seções equivalentes aos grupos de configuração de /minako-configurar: semana/ciclo, canais gerais, Modo Noturno, personalidade sazonal, cargos/permissões e matchmaking.
+- Seção de configuração de sorteios baseada em /sorteios configurar: nome, limites de participantes, ganhadores, início, duração/conclusão, regras de cargos/membros, canal, fixação, mensagem, tópico privado, templates locais e prévia do anúncio.
+- Campos, toggles, seletores e botões interativos para simular o fluxo.
+
+IMPORTANTE — ESTA É UMA SIMULAÇÃO DE INTERFACE:
+- Não salva configurações no Discord nem no PostgreSQL.
+- Não publica, inicia, encerra ou cancela sorteios reais.
+- Ainda não valida permissões administrativas do usuário autenticado.
+- Seletores de canal/cargo/membro são campos de demonstração; na integração real serão substituídos por dados do servidor.
+
+PUBLICAÇÃO:
+1. Faça backup dos arquivos atuais.
+2. Extraia o ZIP na raiz do projeto, preservando os diretórios.
+3. Reconstrua os arquivos estáticos da Activity executando na raiz do projeto:
+   npm --prefix activity install
+   npm --prefix activity run build
+4. Reinicie/republique a aplicação conforme o fluxo da Shard Cloud.
+
+O servidor de produção serve activity/dist; portanto, atualizar apenas App.jsx/styles.css sem executar o build não altera a interface já publicada.
+
+Esta etapa não altera comandos do bot, banco de dados, esquema PostgreSQL, arquivo .env nem o comando de inicialização do bot.

@@ -1,0 +1,112 @@
+MINAKO — MÓDULO DE SORTEIOS V2 (substitui o patch parcial anterior)
+
+INSTALAÇÃO
+1. Backup do projeto.
+2. Extraia este ZIP na raiz da Minako, preservando as pastas (substitui index.js, package.json,
+   commands/sorteios.js e utils/giveawayStore.js; adiciona os demais utils/giveaway*.js e tests/).
+3. node --check index.js && npm test
+4. npm run deploy   (registra /sorteios com os novos subcomandos)
+5. Reinicie UMA instância. As tabelas minako_giveaway* são criadas sozinhas no boot (CREATE TABLE IF NOT EXISTS).
+   Nada de app_data/Ami Mizuno é tocado. (Se você já subiu a V2 antes, as colunas thread_id, creator_role_ids, reward_role_ids e global_rules e a tabela minako_giveaway_role_ops são criadas sozinhas.) Sorteios do patch antigo (app_data "minako-giveaways-v1:*") NÃO são migrados.
+
+COMANDOS
+/sorteios cargos              (só administradores) define quem pode criar sorteios e quais cargos os hosts podem
+                              conferir/remover dos ganhadores
+/sorteios regras-globais      (só administradores) regras de cargos/membros que valem para TODOS os sorteios
+/sorteios configurar          painel V2 (abas Geral · Regras · Publicação · Mensagem) + prévia ao vivo efêmera
+/sorteios encerrar nome       sorteia agora (host/admin)
+/sorteios cancelar nome       cancela antes do sorteio (host/admin)
+/sorteios template-excluir    remove template (admin/cargos de gestão)
+
+QUEM PODE CRIAR: Administradores e os cargos escolhidos em /sorteios cargos (lista própria do módulo, até 10 cargos,
+independente dos cargos de partidas). Enquanto nenhum cargo for escolhido, só administradores criam sorteios.
+A permissão é conferida de novo a cada clique no painel. Templates seguem a mesma regra.
+QUEM PODE Remover participante / Ressortear / Concluir / encerrar / cancelar: host do sorteio ou Administrador
+(conferido no servidor a cada clique).
+
+PLACEHOLDERS (fixos): {host} {giveaway} {user1}{user2}… {users} {winners} {participants} {min} {max}
+{channel} {start} {end} {endrelative} {link} {date}. {userN} só existe após o sorteio (antes aparece "—").
+
+REGRAS IMPLEMENTADAS
+- Nome exclusivo entre sorteios "vivos" do servidor (agendado/ativo/aguardando conclusão). Garantido por índice
+  único parcial no banco; concluídos/cancelados liberam o nome. Templates têm nome exclusivo próprio.
+- Mínimo/máximo, nº de ganhadores, duração OU data de conclusão (fuso do servidor, padrão America/Sao_Paulo).
+- Cargos permitidos/bloqueados; afastamento do ganhador por X sorteios OU X dias (um ou outro), aplicado ao Concluir.
+- Agendamento opcional; canal/tópico (texto, anúncios ou tópico público); fixar (padrão: não; desafixa ao concluir).
+- Tópico privado host+ganhadores com mensagem própria, criado NO MOMENTO em que o resultado é anunciado.
+  Depois disso o bot não altera o tópico: ressorteio ou ajustes de membros são feitos manualmente por um moderador
+  (o tópico é não-convidável, então só quem tem Gerenciar Tópicos adiciona gente). Se a criação falhar, o host é avisado no canal.
+- Mensagem em Components V2: texto, seção+thumbnail, separador, galeria, cor lateral (ou nenhuma).
+- Botões (último row): 🎉 (N) · Sair · Participantes. Contagem atualizada em joins/saídas/remoções
+  (edições agrupadas ~1,2 s para não estourar rate limit). Participar/Sair expiram quando os ganhadores são anunciados.
+- Participantes: 10 por página, por ordem de inscrição; "Remover participante" só para host/admin.
+- Anúncio: Ressortear — o host escolhe 1 ou mais ganhadores atuais para substituir; a quantidade escolhida é a de novos
+  ganhadores (cada novo assume a vaga de um substituído; os demais ficam). Dá para marcar pessoas a evitar. E Concluir.
+- Templates: salvar (sem nome e sem datas) e carregar no painel.
+
+CARGOS DOS GANHADORES (aba "Prêmios" do painel)
+- O administrador define em /sorteios cargos a lista de cargos que os hosts PODEM dar ou tirar. O host só escolhe dentro dela.
+- Conferir e/ou remover cargos dos ganhadores; cada lado tem duração própria: 0 = permanente, N = N dias e depois o bot desfaz
+  (cargo conferido é retirado; cargo removido é devolvido). Os prazos ficam no banco e sobrevivem a reinícios.
+- Aplicado no ANÚNCIO dos ganhadores. No ressorteio, os cargos dos substituídos são desfeitos e os dos novos aplicados.
+  Depois do Concluir o bot não mexe mais (temporários ainda são devolvidos no prazo).
+- Quem já tinha o cargo conferido (ou já não tinha o removido) não é alterado e nunca é "desfeito" depois.
+- Segurança: o cargo precisa estar na lista do administrador, existir, não ser de integração/@everyone e estar abaixo do cargo do bot
+  (o bot também precisa de "Gerenciar Cargos"). A criação do sorteio é recusada com o motivo; se algo mudar depois, o bot avisa o host no canal.
+- Cada operação é registrada ANTES de mexer no Discord (tabela minako_giveaway_role_ops) e é única por sorteio+pessoa+cargo+ação.
+
+REGRAS DE CARGOS E MEMBROS (aba "Regras")
+- Cargos permitidos/bloqueados e agora também MEMBROS permitidos/bloqueados (até 25 de cada).
+- Bloqueio sempre vence permissão. Com cargos E membros permitidos, vale um OU outro.
+- Escopo (botão só habilitado para administradores):
+  * Só este sorteio (padrão): vale para este sorteio e para os criados a partir do template salvo com essas regras.
+  * Global: ao criar o sorteio, as listas são ADICIONADAS às regras globais do servidor e passam a valer para qualquer sorteio da Minako.
+    As regras globais somam-se às locais (a pessoa precisa passar nas duas) e são editadas/removidas em /sorteios regras-globais.
+  Não-administradores que carregam um template global têm o escopo trocado para local; só admins criam/salvam regras globais.
+- Regras valem na entrada E de novo na hora do sorteio/ressorteio (quem perdeu elegibilidade é ignorado).
+
+FALAS DA MINAKO
+Todas as respostas do módulo (inscrição, saída, bloqueios, anúncio, ressorteio, cancelamento, avisos de tópico) vêm de
+utils/giveawayVoice.js: 2 a 4 variações por situação, tom simpático e leve, sem exagero, sem repetir a mesma fala em
+sequência. Para ajustar o jeito dela, edite só esse arquivo (tests/giveawayVoice.test.js valida variáveis e exageros).
+
+DECISÕES QUE EU TOMEI (confirme ou peça ajuste)
+- Ressorteio: ganhadores atuais (inclusive os substituídos) nunca voltam ao sorteio daquela rodada.
+- Prazo vencido com menos participantes que o mínimo → sorteio cancelado com aviso no canal.
+- Participantes que saíram do servidor ou perderam elegibilidade de cargo são ignorados no sorteio.
+- Tópico privado: criado no anúncio (não no Concluir); mudanças posteriores ficam com o moderador.
+- Sorteio anunciado e não concluído continua "vivo" (ocupa o nome) até alguém clicar em Concluir ou cancelar.
+
+SEGURANÇA (mesmos princípios do /partida, mais fortes)
+- Toda mutação roda em transação PostgreSQL com a linha do sorteio travada (FOR UPDATE): vale também para
+  mais de uma instância (a fila em memória do /partida não garante isso).
+- Elegibilidade (cargos, afastamento, limite, prazo) é revalidada DENTRO da transação.
+- deferReply/deferUpdate antes de trabalho pesado; customIds estritos; IDs numéricos conferidos contra o servidor da interação.
+- allowedMentions: mensagem pública nunca pinga; só ganhadores/host em anúncio e tópico. @everyone/@here neutralizados.
+- URLs de mídia só https; limites de blocos/componentes/texto do Discord validados no painel e de novo ao criar.
+- Erros internos nunca são devolvidos crus ao usuário (logados no console).
+- Sorteio aleatório com crypto.randomInt (Fisher–Yates).
+
+PERMISSÕES DO BOT NO CANAL
+Ver canal, Enviar mensagens (ou em tópicos), Fixar mensagens/Gerenciar mensagens (se fixar),
+Criar tópicos privados + Enviar mensagens em tópicos (se tópico privado; só em canal de texto).
+O painel avisa o que faltar antes de criar. Intent GuildMembers já existe no index.js.
+
+NÃO TESTADO / LIMITES
+- Testes automáticos cobrem a lógica (npm test: giveawayCore, giveawayVoice, giveawayRedraw, giveawayRoles, giveawaySmoke). O smoke usa stubs de discord.js/pg:
+  NÃO valida a API real do Discord nem o SQL em um PostgreSQL de verdade. Faça o teste de homologação abaixo.
+- O rascunho do painel fica em memória (se o bot reiniciar durante a configuração, abra /sorteios configurar de novo).
+  Sorteios já criados vivem no banco e sobrevivem a reinícios.
+- A prévia usa a sessão do comando (válida ~15 min); se expirar, o bot envia uma nova prévia automaticamente.
+
+TESTE DE HOMOLOGAÇÃO SUGERIDO
+1) Criar sorteio imediato (mín 2, 1 ganhador, 3 min) → 2 contas entram/saem/entram; conferir (N) no botão.
+2) Conta com cargo bloqueado e conta sem cargo permitido → mensagens de bloqueio.
+3) Participantes → paginação e remoção por host; tentar remover com conta comum (deve negar).
+4) Esperar o prazo → anúncio; Ressortear (marcar 1+ ganhadores para substituir / evitar alguém); Concluir.
+5) Ganhador com afastamento de 1 sorteio → tentar entrar no próximo (mensagem de afastado com contagem).
+6) Agendar para daqui 2 min; reiniciar o bot antes → deve publicar mesmo assim.
+7) Dois admins criando o mesmo nome ao mesmo tempo → só um passa.
+8) /sorteios cargos: liberar 2 cargos de prêmio; criar sorteio conferindo um por 1 dia e removendo outro; conferir no anúncio.
+9) Ressortear 1 ganhador → cargos dele desfeitos e os do novo aplicados. Colocar cargo acima do bot → criação recusada com o motivo.
+10) Regra global (admin): bloquear um membro em um sorteio com escopo global e tentar entrar em OUTRO sorteio com a conta bloqueada.

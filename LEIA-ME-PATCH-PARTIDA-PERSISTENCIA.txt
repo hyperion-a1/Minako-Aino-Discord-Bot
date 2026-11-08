@@ -1,0 +1,44 @@
+PATCH AMI MIZUNO — CONFIABILIDADE DE PERSISTÊNCIA DO /PARTIDA
+
+Objetivo
+- Serializar as gravações de estado das partidas no PostgreSQL, preservando a ordem em que foram solicitadas.
+- Evitar que uma gravação antiga, concluída com atraso, sobrescreva no banco uma atualização mais recente.
+- Gravar o JSON local com substituição atômica para reduzir o risco de arquivo truncado em encerramento inesperado.
+- Aguardar as gravações pendentes antes de fechar o pool do PostgreSQL em SIGINT/SIGTERM.
+- Adicionar teste unitário para a fila serial.
+
+Arquivos incluídos
+- utils/matchStore.js
+- utils/serialQueue.js (novo)
+- commands/partida.js
+- index.js
+- package.json
+- tests/serialQueue.test.js (novo)
+
+Compatibilidade e segurança
+- Não há migração de schema nem alteração no formato dos objetos de partida.
+- Não remove nem recria partidas; mantém os mesmos IDs de mensagem, participantes e rotas.
+- A persistência local JSON continua disponível como fallback.
+- A fila organiza as gravações dentro desta instância do bot. Não é um bloqueio distribuído para múltiplas instâncias e não substitui transações do PostgreSQL para mutações concorrentes entre processos.
+- Se o PostgreSQL falhar, o erro continua sendo registrado; a gravação local já terá ocorrido. Verifique os logs após atualizar.
+
+Instalação (Termux)
+1. Faça uma cópia de segurança do projeto e do arquivo data/matches.json.
+2. Extraia o ZIP na raiz do projeto:
+   cd ~/projetos/'Ami Mizuno'
+   unzip -o ~/storage/downloads/patch-partida-persistencia.zip -d .
+3. Valide a sintaxe:
+   node --check index.js
+   node --check commands/partida.js
+   node --check utils/matchStore.js
+   node --check utils/serialQueue.js
+4. Execute os testes:
+   npm test
+5. Reinicie o processo existente do bot; não inicie uma segunda instância.
+
+Validação pós-instalação
+- Confira que as partidas abertas continuam no canal original.
+- Teste inscrição, desistência e nova inscrição.
+- Teste uma alteração administrativa enquanto outro membro entra.
+- Confira os logs de persistência no PostgreSQL.
+- Antes de avançar para transações/serialização de mutações, valide este patch em uso real.

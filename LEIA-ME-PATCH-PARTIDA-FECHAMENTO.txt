@@ -1,0 +1,20 @@
+PATCH MINAKO — /partida: encerramento serializado
+
+Arquivos:
+- commands/partida.js
+
+O que muda:
+- O cancelamento de uma partida e a confirmação do encerramento deixam de montar uma lista a partir do cache e gravá-la diretamente com saveMatches.
+- Ambos removem a partida dentro de mutateMatches, usando a mesma fila de leitura-modificação-gravação já introduzida no patch de concorrência.
+- Isso reduz o risco de o encerramento sobrescrever uma inscrição/desistência ocorrida em paralelo na mesma instância.
+
+Instalação (Termux):
+cd ~/projetos/'Ami Mizuno'
+unzip -o ~/storage/downloads/patch-partida-fechamento.zip -d .
+node --check commands/partida.js
+npm test
+
+Limitações:
+- Proteção local ao processo; não é lock distribuído entre várias instâncias.
+- A criação da partida e as operações administrativas ainda precisam de coordenação completa e testes integrados com PostgreSQL.
+- A suíte automatizada local passou, mas não foi executada contra o PostgreSQL de produção.

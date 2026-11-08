@@ -1,0 +1,30 @@
+PATCH DE CONFIABILIDADE — MÓDULO /PARTIDA
+Base: minako_10-10-2026.zip
+
+O QUE MUDA
+- Reconhece a seleção de rota com deferUpdate() antes do processamento, reduzindo a chance de DiscordAPIError[10062] (Unknown interaction).
+- Atualiza a resposta efêmera com editReply() depois do deferUpdate(), sem tentar responder duas vezes à mesma interação.
+- Mantém a atualização do painel público independente da edição da resposta efêmera.
+- Adiciona tratamento de erro no processamento da inscrição e mensagens/logs mais claros.
+- Não altera o formato dos dados das partidas, o schema PostgreSQL, nem as regras de alocação.
+
+INSTALAÇÃO (Termux)
+1. Faça uma cópia de segurança do projeto e, se possível, confirme que o bot está em estado estável.
+2. Extraia o ZIP na raiz do projeto, preservando a estrutura de pastas:
+   unzip -o ~/storage/downloads/patch-partida-confiabilidade.zip -d .
+3. Verifique a sintaxe:
+   node --check commands/partida.js
+4. Inicie/reinicie o bot na forma habitual:
+   npm start
+
+IMPACTO NAS PARTIDAS EM ANDAMENTO
+O patch não migra nem limpa partidas e não altera seus dados armazenados. As partidas existentes devem continuar carregadas normalmente após o reinício, desde que a persistência atual esteja íntegra. Como qualquer reinício do processo, a implantação interrompe brevemente as interações enquanto o bot reinicia; prefira um momento de menor atividade.
+
+VALIDAÇÃO PÓS-INSTALAÇÃO
+- Inscreva uma conta não-staff numa partida de teste já aberta.
+- Confirme que a resposta efêmera confirma a inscrição e que o painel público atualiza a contagem e a alocação.
+- Teste desistência e inscrição por /partida entrar, se usados no servidor.
+- Confira os logs por erros [partida] e pela ausência de Unknown interaction no fluxo de escolha de rota.
+
+OBSERVAÇÃO
+A suíte existente `npm test` passou na preparação deste patch, e `node --check commands/partida.js` também passou. A suíte atual não contém testes de integração dedicados a `/partida`; portanto, a validação real no servidor após a implantação continua necessária.

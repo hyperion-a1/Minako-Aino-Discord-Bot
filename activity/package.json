@@ -1,0 +1,27 @@
+{
+  "name": "minako-discord-activity",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Activity inicial da Minako — Central de Matchmaking",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c blue,green \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:client": "vite --host 0.0.0.0",
+    "dev:server": "node server.mjs",
+    "build": "vite build",
+    "start": "NODE_ENV=production node server.mjs",
+    "check": "node --check server.mjs"
+  },
+  "dependencies": {
+    "@discord/embedded-app-sdk": "^2.5.0",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.7.0",
+    "concurrently": "^9.2.1",
+    "vite": "^6.4.1"
+  }
+}

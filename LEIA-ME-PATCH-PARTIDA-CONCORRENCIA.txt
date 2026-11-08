@@ -1,0 +1,21 @@
+MINAKO — PATCH /partida: COORDENAÇÃO DE MUTAÇÕES
+
+O que muda
+- Adiciona mutateMatches() ao matchStore, serializando operações completas de mutação na instância atual.
+- Inscrição por seleção de rotas, desistência, adição administrativa e remoção administrativa passam a ler/validar/alterar/salvar dentro da mesma seção serializada.
+- Revalida duplicidade e limite de 10 no momento de efetivar a alteração.
+- Inclui teste automatizado que dispara 10 mutações concorrentes e verifica que nenhuma é perdida.
+
+Instalação
+1. Faça backup do projeto.
+2. Extraia o ZIP na raiz do projeto.
+3. Rode:
+   node --check utils/matchStore.js
+   node --check commands/partida.js
+   node --check tests/matchMutation.test.js
+   npm test
+
+Limitação conhecida
+A coordenação implementada é por processo. Se forem executadas duas instâncias do bot simultaneamente, a fila em memória não coordena as instâncias; a garantia distribuída exige executar a mutação inteira sob lock transacional no PostgreSQL. Não execute duas instâncias em paralelo.
+
+O patch não executa migrações nem modifica o formato dos dados existentes.

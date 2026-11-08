@@ -1,0 +1,22 @@
+PATCH — PARTIDA: CRIAÇÃO CONCORRENTE
+
+Objetivo
+- Evitar que duas criações simultâneas com o mesmo nome registrem duas partidas abertas.
+- Usar mutateMatches() também na criação, para que a checagem e a inclusão sejam uma única mutação serializada dentro desta instância.
+- Se outra criação vencer a corrida depois de o painel público ter sido enviado, a Minako tenta apagar o painel duplicado e informa o administrador em resposta privada.
+
+Arquivo incluído
+- commands/partida.js
+
+Instalação
+1. Faça backup do projeto.
+2. Extraia este ZIP na raiz do projeto, mantendo os caminhos.
+3. Execute:
+   node --check commands/partida.js
+   npm test
+
+Importante
+- Este patch pressupõe que os patches anteriores de partida estejam instalados, em especial patch-partida-concorrencia.zip, que introduziu mutateMatches().
+- A serialização é dentro de um único processo Node.js. Ainda não garante exclusão mútua entre duas instâncias da aplicação conectadas ao mesmo PostgreSQL; essa é uma etapa separada.
+- A exclusão do painel duplicado depende de a aplicação ter permissão para apagar a própria mensagem.
+- Os testes automatizados atuais foram executados e passaram, mas não houve teste de integração contra uma instância real do PostgreSQL nem simulação end-to-end do Discord.

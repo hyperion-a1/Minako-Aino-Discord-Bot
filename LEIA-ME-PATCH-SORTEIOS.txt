@@ -1,0 +1,32 @@
+PATCH COMPLEMENTAR — MÓDULO DE SORTEIOS (MINAKO)
+
+Instalação
+1. Faça backup dos arquivos atuais.
+2. Extraia este ZIP na raiz da instalação da Minako, preservando os diretórios.
+3. Confira se DATABASE_URL e MINAKO_TOKEN já estão configurados.
+4. Reinicie o bot e execute `npm run deploy` para registrar /sorteios.
+5. Teste em um canal de homologação antes de disponibilizar aos membros.
+
+Arquivos incluídos
+- commands/sorteios.js: comando /sorteios e interações.
+- utils/giveawayStore.js: persistência isolada por servidor na tabela app_data do PostgreSQL compartilhado.
+- index.js e deploy-commands.js: registro/roteamento do novo módulo.
+
+Comandos
+- /sorteios configurar: abre formulário inicial e permite publicar, guardar como template ou deixar em início manual.
+- /sorteios criar: cria a partir de um template salvo.
+- /sorteios templates: lista templates.
+- /sorteios encerrar nome:<nome>: encerra um sorteio.
+
+Importante — escopo desta versão
+Este é o primeiro incremento funcional, não a implementação integral de todos os requisitos da especificação. O fluxo inicial suporta nome exclusivo, texto, mínimo/máximo de participantes, quantidade de ganhadores, início manual/imediato, templates, inscrição/saída, lista paginada, remoção por host/admin, sorteio aleatório e conclusão. A persistência exige PostgreSQL habilitado e usa chave própria por servidor para não sobrescrever dados da Ami Mizuno ou outros módulos.
+
+Ainda não implementados nesta versão: editor Components V2 e preview ao vivo, seletor de canal/tópico na configuração, data/hora de agendamento, cargos permitidos/bloqueados via painel, afastamento por número de sorteios, fixação da mensagem, criação de tópico privado e mensagem interna, placeholders avançados, ressortear com substituição/exclusões, e scheduler para concluir automaticamente na data. Não considere esses recursos disponíveis até receber um patch complementar.
+
+Observações técnicas
+- Os botões de administração validam novamente host/administrador no servidor.
+- O estado é gravado com transação e bloqueio de linha no PostgreSQL; a fila local evita mutações concorrentes dentro da mesma instância.
+- Para múltiplas instâncias do bot, a transação PostgreSQL serializa as gravações, mas testes de carga e de permissões devem ser feitos antes de produção.
+
+
+Atualização de contagem: o botão de inscrição agora mostra "Participar (N)" e é atualizado após inscrições, saídas e remoções administrativas. A contagem da mensagem também é atualizada junto com o botão.

@@ -1,0 +1,67 @@
+MANIFESTO — Matchmaking da Minako (pacote apenas com arquivos alterados/novos)
+
+Extraia na RAIZ do projeto, mantendo as pastas. Arquivos existentes serão sobrescritos.
+
+ARQUIVOS EXISTENTES MODIFICADOS (faça backup antes):
+  - commands/minako-configurar.js
+  - commands/minako-match.js
+  - deploy-commands.js
+  - index.js
+  - package.json
+
+ARQUIVOS NOVOS:
+  - commands/minako-matchmaking.js
+  - docs/MATCHMAKING.md
+  - scripts/mm-restore.js
+  - scripts/mm-rollback.js
+  - tests/helpers/discordStubs.js
+  - tests/mmBackup.test.js
+  - tests/mmCentral.test.js
+  - tests/mmCentralView.test.js
+  - tests/mmConfigPanel.test.js
+  - tests/mmConfigParse.test.js
+  - tests/mmCore.test.js
+  - tests/mmEngagement.test.js
+  - tests/mmGroupFlow.test.js
+  - tests/mmGroupView.test.js
+  - tests/mmMatchFlow.test.js
+  - tests/mmNotifyPolicy.test.js
+  - tests/mmPlayFlow.test.js
+  - tests/mmRelease11.test.js
+  - tests/mmReliability.test.js
+  - tests/mmReliabilityFlow.test.js
+  - tests/mmSocialCore.test.js
+  - tests/mmSocialFlow.test.js
+  - tests/mmTeamFlow.test.js
+  - tests/mmTeams.test.js
+  - utils/matchmaking/backupFormat.js
+  - utils/matchmaking/central.js
+  - utils/matchmaking/centralView.js
+  - utils/matchmaking/configPanel.js
+  - utils/matchmaking/configParse.js
+  - utils/matchmaking/engagementFlow.js
+  - utils/matchmaking/engagementStore.js
+  - utils/matchmaking/engine.js
+  - utils/matchmaking/groupFlow.js
+  - utils/matchmaking/groupView.js
+  - utils/matchmaking/index.js
+  - utils/matchmaking/matchFlow.js
+  - utils/matchmaking/mmCore.js
+  - utils/matchmaking/notify.js
+  - utils/matchmaking/notifyPolicy.js
+  - utils/matchmaking/permissions.js
+  - utils/matchmaking/playFlow.js
+  - utils/matchmaking/prefsFlow.js
+  - utils/matchmaking/reliability.js
+  - utils/matchmaking/reliabilityFlow.js
+  - utils/matchmaking/reliabilityStore.js
+  - utils/matchmaking/schema.js
+  - utils/matchmaking/social.js
+  - utils/matchmaking/socialFlow.js
+  - utils/matchmaking/socialStore.js
+  - utils/matchmaking/store.js
+  - utils/matchmaking/teamFlow.js
+  - utils/matchmaking/teamStore.js
+  - utils/matchmaking/teams.js
+
+Leia docs/MATCHMAKING.md antes de instalar. Nenhuma dependência nova.

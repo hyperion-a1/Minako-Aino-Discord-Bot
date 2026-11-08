@@ -1,0 +1,30 @@
+PATCH — BUSCA DE MEMBROS, TÓPICOS, ÁUDIO ACONCHEGANTE E BANCO NO SITE
+(Cumulativo: inclui os patches anteriores. Substitua os arquivos preservando os diretórios.)
+
+ARQUIVOS
+- activity/server.mjs                 (endpoint /api/dashboard/members; tópicos ativos em guild-data; sessões no PostgreSQL; /api/health com teste do banco)
+- activity/src/App.jsx                (MemberField; tópicos nos seletores de canal)
+- activity/src/WebApp.jsx             (abas Dashboard/Central, indicador do banco)
+- activity/src/audio/audioEngine.js   (estilo sonoro "aconchegante")
+- activity/src/audio/AudioControls.jsx(seletor de estilo no painel de áudio)
+- activity/src/styles.css
+
+O QUE MUDA
+1. Membros dos sorteios (permitidos/bloqueados): busca por nome ou apelido (mín. 2 letras); os chips mostram o nome. Requer o intent "Server Members" ligado no bot (já usado pelo index.js).
+2. Tópicos: os seletores de canal agora listam os tópicos ATIVOS (🧵) com o canal de origem. Tópicos arquivados não aparecem.
+3. Áudio: painel de áudio ganhou "✨ Mágico" (atual) e "🧸 Aconchegante" (plucks de kalimba/caixa de música em escala pentatônica, acordes suaves). Vale para efeitos e para a música ambiente; trocar de estilo reinicia a trilha. A escolha fica salva no dispositivo.
+4. Banco no site:
+   - Sessões de login ficam na tabela minako_web_sessions (criada automaticamente). O token do Discord é cifrado (AES-256-GCM); reiniciar o servidor NÃO desconecta mais ninguém.
+   - Variável opcional SESSION_SECRET: segredo usado na cifra. Sem ela, usa o DISCORD_CLIENT_SECRET. Se trocar o segredo, as sessões antigas deixam de valer (basta entrar de novo).
+   - Nova aba "Central" no site, com dados reais do matchmaking (mesmo endpoint da Activity).
+   - Selo "Banco conectado / indisponível" no topo, via /api/health (faz SELECT 1).
+   - A Dashboard já lia e gravava no PostgreSQL; isso continua igual.
+
+ANTES DE PUBLICAR
+- Rebuild: npm --prefix activity run build, depois reinicie.
+- Mantenha MINAKO_TOKEN e DATABASE_URL definidos no ambiente.
+
+LIMITES
+- Não testado com Discord real nem no navegador: valide login, busca de membros e áudio após publicar.
+- A busca de membros depende da API de busca do Discord (pode ignorar membros sem nome parecido ou com muitos resultados).
+- Navegadores só tocam áudio após o primeiro clique/toque na página.

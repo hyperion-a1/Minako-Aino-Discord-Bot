@@ -1,0 +1,92 @@
+MINAKO AINO — PATCH 2: OAUTH E AUTORIZAÇÃO DE CRIADORES
+======================================================
+
+BASE E DEPENDÊNCIA
+------------------
+Este patch é incremental e foi preparado sobre o projeto minako_03-11-2026.zip
+com o PATCH 1 do TikTok Watcher já aplicado.
+Contém somente arquivos novos ou alterados desde o Patch 1. Preserve os diretórios.
+
+O QUE ESTA ETAPA ENTREGA
+------------------------
+- Comando /tiktok com solicitação, cadastro administrativo, aprovação e rejeição.
+- Conexão OAuth oficial do TikTok pelo titular da conta.
+- Callback HTTPS em /api/tiktok/callback na API Express da Activity.
+- Estado OAuth aleatório de 256 bits, armazenado em hash e consumido uma única vez.
+- Vínculo da autorização ao servidor, titular Discord e conta previamente aprovada.
+- Criptografia AES-256-GCM dos access tokens e refresh tokens no PostgreSQL.
+- Renovação do access token com rotação e substituição segura do refresh token.
+- Revogação remota da autorização TikTok ao desconectar, quando o TikTok confirmar.
+- Comandos para listar contas e configurar o canal de notificações.
+- Teste automatizado do fluxo de construção de URL e criptografia.
+
+COMANDOS
+--------
+/tiktok solicitar perfil:<usuario>
+  Membro solicita o monitoramento da própria conta. Fica pendente de aprovação.
+
+/tiktok adicionar membro:<Discord> perfil:<usuario>
+  Administrador cadastra e aprova diretamente. O titular ainda precisa conectar via OAuth.
+
+/tiktok aprovar id:<id>
+/tiktok rejeitar id:<id>
+  Administração processa solicitações pendentes.
+
+/tiktok conectar id:<id>
+  O titular da conta aprovada recebe um link privado de autorização.
+
+/tiktok desconectar id:<id>
+  O titular revoga a autorização (quando possível) e remove os tokens locais.
+
+/tiktok listar
+/tiktok canal canal:<#canal>
+  Administração consulta as contas e configura o destino dos alertas.
+
+CONFIGURAÇÃO NO TIKTOK FOR DEVELOPERS
+-------------------------------------
+1. Criar/selecionar o app no TikTok for Developers.
+2. Adicionar o produto Login Kit e configurar a plataforma Web.
+3. Adicionar o produto Display API.
+4. Solicitar/habilitar os escopos user.info.basic e video.list. O TikTok pode exigir
+   análise/aprovação do app e dos escopos antes de liberar o uso em produção.
+5. Registrar exatamente a URI de callback HTTPS, sem query string ou fragmento:
+   https://SEU-DOMINIO-PUBLICO/api/tiktok/callback
+6. Configurar no painel seguro da Shard Cloud as variáveis:
+   TIKTOK_CLIENT_KEY=...
+   TIKTOK_CLIENT_SECRET=...
+   TIKTOK_REDIRECT_URI=https://SEU-DOMINIO-PUBLICO/api/tiktok/callback
+   TIKTOK_TOKEN_ENCRYPTION_KEY=...
+
+GERE A CHAVE DE CRIPTOGRAFIA COM:
+  node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
+
+A chave deve ter 64 caracteres hexadecimais (32 bytes). Guarde-a em local seguro.
+Não a envie no ZIP, Discord, repositório ou conversa. Perder essa chave impede a
+Minako de descriptografar tokens já armazenados; trocar a chave exige migração/recriptação.
+
+INSTALAÇÃO
+----------
+1. Faça backup do projeto.
+2. Confirme que o Patch 1 está instalado. Este Patch 2 depende das tabelas e do store
+   criados na etapa anterior.
+3. Envie o ZIP para a raiz do projeto, preservando os diretórios.
+4. Não substitua o .env real pelo .env.example.
+5. Configure as quatro variáveis TikTok no painel seguro da hospedagem.
+6. Reinicie a aplicação.
+7. Execute `node deploy-commands.js` para registrar o novo comando /tiktok.
+8. Teste /tiktok solicitar e, após aprovação, /tiktok conectar.
+
+IMPORTANTE
+----------
+- Não há monitoramento de vídeos ou lives ativo neste patch; isso vem nas próximas etapas.
+- O OAuth Web não usa PKCE (a documentação do TikTok exige PKCE para apps desktop/mobile,
+  não para o fluxo Web confidencial). O state de uso único protege o callback contra CSRF.
+- O titular pode conceder apenas parte dos escopos. A Minako exige user.info.basic e
+  video.list para concluir a conexão destinada ao monitoramento de vídeos.
+- O TikTok pode exigir revisão/aprovação do produto e dos escopos. Código implementado
+  não significa que o app já recebeu aprovação do TikTok.
+- Ao desconectar, a Minako tenta revogar o access token no endpoint oficial. Se a chamada
+  falhar, os tokens são apagados localmente e o titular recebe orientação para revogar
+  a permissão nas configurações de aplicativos do TikTok.
+- A renovação automática é feita sob demanda pelo gerenciador de tokens quando um módulo
+  de monitoramento solicita um access token válido. O monitor usará esse gerenciador.
